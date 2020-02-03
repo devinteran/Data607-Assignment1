@@ -1,0 +1,63 @@
+---
+title: "Assignment1-02.02.2020"
+author: "Devin Teran"
+date: "02/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+```
+
+# Halloween Candy Analysis ## 
+**Overview:**  
+*Article can be found at:* <https://raw.githubusercontent.com/fivethirtyeight/data/master/candy-power-ranking/candy-data.csv>  
+This article analyzes the most popular halloween candy based on an internet survey.  The survey presented two candies side by side and asked users to choose their favorite.  The user was then shown two different candies and it continued.  Using the results from this survey, the author, Walt Hickey, then determined what characteristics make up the most popular candy. 
+
+## Retrieve Data
+Get data from GitHub respository.
+```{r get_data}
+
+candy_raw <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/candy-power-ranking/candy-data.csv")
+candy <- candy_raw
+```
+
+
+## Clean Data
+* Change all columns that represent percentages into same format of decimals (e.g. 8% -> 0.08)
+* Rename columns
+* Replace Õ with no space
+```{r clean_data}
+candy$winpercent <- candy$winpercent/100 
+
+colnames(candy)[colnames(candy) == 'competitorname'] <- 'Candy'
+colnames(candy)[colnames(candy) == 'peanutyalmondy'] <- 'Nuts'
+colnames(candy)[colnames(candy) == 'sugarpercent'] <- 'Sugar_Percentile'
+colnames(candy)[colnames(candy) == 'pricepercent'] <- 'Price_Percentile'
+colnames(candy)[colnames(candy) == 'pluribus'] <- 'Multiple_Candies_In_Container'
+colnames(candy)[colnames(candy) == 'winpercent'] <- 'Perct_Won_Matchup'
+
+candy$Candy <- sub("Õ","",candy$Candy)
+```
+
+## Allergy Information
+Do you know someone with a nut allergy?  Here are the most popular candy types that are free of all nuts.
+```{r allergy_info}
+
+nut_free_candy <- subset(candy,Nuts == 0)
+nut_free_candy[order(-nut_free_candy$Perct_Won_Matchup),c("Candy","Perct_Won_Matchup")]
+
+```
+
+## Budget Candy
+Here are the most budget friendly candies that won atleast 50% of matchups:
+```{r budget_candy}
+popular_candy <- subset(candy,Perct_Won_Matchup >= 0.50)
+cheapest_candy <- popular_candy[order(-popular_candy$Price_Percentile),c("Candy","Price_Percentile","Perct_Won_Matchup")]
+cheapest_candy
+```
+
+## Conclusions
+The author of this article did some wonderful analysis to determine which ingredients make for the most popular candy.  He determined that chocolate is very popular while fruit is less popular.  I would like to extend this analysis to replicate his work and investigate on my own why certain candies are popular based on ingredients.  I'd also like to investigate if the most popular ingredients correlate to the most expensive candy.  
